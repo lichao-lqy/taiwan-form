@@ -448,6 +448,16 @@
 
 </div><!-- /container -->
 
+<div id="success-screen" style="display:none;text-align:center;padding:60px 24px;">
+  <div style="font-size:56px;margin-bottom:20px">🏙</div>
+  <div style="font-size:22px;font-weight:700;color:var(--gold);margin-bottom:10px">感謝您的填寫！</div>
+  <div style="color:var(--muted);font-size:14px;line-height:1.8">
+    您的資料已成功記錄<br>
+    我們的顧問將盡快與您聯繫<br><br>
+    <span style="color:var(--gold)">東京不動産 · 專屬投資顧問服務</span>
+  </div>
+</div>
+
 <div class="bottom-bar">
   <button class="btn-copy" onclick="copyText()">📋 複製</button>
   <button class="btn-submit" onclick="submitForm()">✅ 完成・送出並複製</button>
@@ -598,7 +608,6 @@ function showToast() {
 // ── 請將部署後的網址貼在這裡 ─────────────────────────────────
 // 完成 Apps Script 部署後，把「網路應用程式網址」貼到下方
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyUo-11E56kw5xkw_3DXDnvQZoH5DyV-NYPMNPNt3BQaSDzYcQ71N2dmHkrFwXETBRG_g/exec";
-// ────────────────────────────────────────────────────────────
 
 function collectData() {
   return {
@@ -631,41 +640,26 @@ function submitForm() {
   if (!name)       { alert("請填寫姓名 🙏"); return; }
   if (!hasContact) { alert("請選擇至少一種聯絡方式 🙏"); return; }
 
-  // 先複製到剪貼簿（備份）
   copyText();
-
-  // 如果還沒設定 URL，只複製就好
-  if (!SCRIPT_URL || SCRIPT_URL.includes("在這裡")) return;
-
   setSubmitState(true);
-  fetch(SCRIPT_URL, {
-    method: "POST",
-    mode: "no-cors",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(collectData())
-  })
-  .then(() => {
+
+  // GET + URL參數方式，完全繞過 CORS 限制
+  const data = collectData();
+  const params = new URLSearchParams();
+  Object.keys(data).forEach(k => params.append(k, data[k]));
+  const url = SCRIPT_URL + "?" + params.toString();
+
+  const img = new Image();
+  img.onload = img.onerror = () => {
     setSubmitState(false);
     showSuccessScreen();
-  })
-  .catch(() => {
-    setSubmitState(false);
-    // 網路失敗時提示已複製，不影響使用
-    alert("⚠️ 網路送出失敗，但資料已複製到剪貼簿，請手動貼給顧問。");
-  });
+  };
+  img.src = url;
 }
 
 function showSuccessScreen() {
-  document.getElementById("form-area").innerHTML = `
-    <div style="text-align:center;padding:60px 24px">
-      <div style="font-size:56px;margin-bottom:20px">🏙</div>
-      <div style="font-size:22px;font-weight:700;color:var(--gold);margin-bottom:10px">感謝您的填寫！</div>
-      <div style="color:var(--muted);font-size:14px;line-height:1.8">
-        您的資料已成功記錄<br>
-        我們的顧問將盡快與您聯繫<br><br>
-        <span style="color:var(--gold)">東京不動産 · 專屬投資顧問服務</span>
-      </div>
-    </div>`;
+  document.getElementById("form-area").style.display = "none";
+  document.getElementById("success-screen").style.display = "block";
   document.querySelector(".dots-bar").innerHTML =
     `<div style="color:var(--gold);font-size:13px;letter-spacing:2px">✦ 已完成 ✦</div>`;
   document.querySelector(".bottom-bar").style.display = "none";
