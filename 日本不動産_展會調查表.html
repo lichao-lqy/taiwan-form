@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>日本不動産 投資意向調查</title>
+<style>
+  :root {
+    --bg:      #0d1b2e;
+    --card:    #132236;
+    --border:  #1e3450;
+    --gold:    #c9a84c;
+    --lgold:   #f0d98a;
+    --white:   #f0eff0;
+    --muted:   #7a93ad;
+    --pill-bg: #1a2f47;
+    --pill-on: #c9a84c;
+    --radius:  12px;
+    --text:    #e8edf2;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, "PingFang TC", "Microsoft JhengHei", sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* ── Header ── */
+  .hero {
+    padding: 40px 24px 28px;
+    text-align: center;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: "東京";
+    position: absolute;
+    font-size: 120px;
+    font-weight: 900;
+    color: rgba(201,168,76,0.04);
+    top: -10px; left: 50%;
+    transform: translateX(-50%);
+    letter-spacing: -4px;
+    user-select: none;
+    white-space: nowrap;
+  }
+  .logo-line {
+    font-size: 11px;
+    letter-spacing: 4px;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .hero h1 {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--white);
+    margin-bottom: 6px;
+  }
+  .hero p {
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .gold-line {
+    width: 40px; height: 2px;
+    background: var(--gold);
+    margin: 14px auto 0;
+    border-radius: 1px;
+  }
+
+  /* ── Progress dots ── */
+  .dots-bar {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    padding: 18px 24px 10px;
+  }
+  .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--border);
+    transition: background 0.3s, transform 0.2s;
+  }
+  .dot.done  { background: var(--gold); }
+  .dot.active { background: var(--lgold); transform: scale(1.3); }
+
+  /* ── Question cards ── */
+  .container { max-width: 520px; margin: 0 auto; padding: 8px 16px 100px; }
+
+  .qcard {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px 20px 20px;
+    margin-bottom: 14px;
+    position: relative;
+    overflow: hidden;
+  }
+  .qcard::after {
+    content: attr(data-num);
+    position: absolute;
+    right: 16px; top: 12px;
+    font-size: 56px;
+    font-weight: 900;
+    color: rgba(201,168,76,0.08);
+    line-height: 1;
+    user-select: none;
+  }
+  .q-label {
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--gold);
+    margin-bottom: 8px;
+    text-transform: uppercase;
+  }
+  .q-text {
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--white);
+    margin-bottom: 16px;
+    line-height: 1.4;
+  }
+  .q-text .req { color: var(--gold); margin-left: 3px; }
+
+  /* ── Pill options ── */
+  .pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .pill {
+    padding: 9px 16px;
+    border: 1.5px solid var(--border);
+    border-radius: 24px;
+    background: var(--pill-bg);
+    color: var(--muted);
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.18s;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .pill input { display: none; }
+  .pill:active { transform: scale(0.96); }
+  .pill.active {
+    border-color: var(--gold);
+    background: rgba(201,168,76,0.12);
+    color: var(--lgold);
+    font-weight: 600;
+  }
+
+  /* ── Text inputs ── */
+  .text-row { display: flex; gap: 10px; flex-wrap: wrap; }
+  .text-row .tf { flex: 1; min-width: 140px; }
+  .tf input, .tf textarea {
+    width: 100%;
+    background: #0f1e2f;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    color: var(--text);
+    font-size: 15px;
+    font-family: inherit;
+    transition: border-color 0.2s;
+    -webkit-appearance: none;
+  }
+  .tf input::placeholder, .tf textarea::placeholder { color: var(--muted); }
+  .tf input:focus, .tf textarea:focus {
+    outline: none;
+    border-color: var(--gold);
+    box-shadow: 0 0 0 3px rgba(201,168,76,0.12);
+  }
+  .tf label {
+    display: block;
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 5px;
+    letter-spacing: 0.5px;
+  }
+
+  /* ── Contact cards ── */
+  .contact-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .contact-card {
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 12px;
+    background: var(--pill-bg);
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.18s;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .contact-card input { display: none; }
+  .contact-card .icon { font-size: 22px; margin-bottom: 4px; }
+  .contact-card .cname { font-size: 13px; color: var(--muted); }
+  .contact-card.active {
+    border-color: var(--gold);
+    background: rgba(201,168,76,0.1);
+  }
+  .contact-card.active .cname { color: var(--lgold); font-weight: 600; }
+  .contact-info-area { margin-top: 12px; }
+  .contact-info-area .tf { display: none; }
+  .contact-info-area .tf.show { display: block; }
+
+  /* ── Bottom bar ── */
+  .bottom-bar {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    padding: 12px 16px;
+    background: rgba(13,27,46,0.97);
+    border-top: 1px solid var(--border);
+    backdrop-filter: blur(8px);
+    display: flex;
+    gap: 10px;
+    z-index: 200;
+  }
+  .btn-copy {
+    flex: 1;
+    padding: 13px;
+    border: 1.5px solid var(--gold);
+    border-radius: 10px;
+    background: transparent;
+    color: var(--gold);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    -webkit-tap-highlight-color: transparent;
+    transition: background 0.15s;
+  }
+  .btn-copy:active { background: rgba(201,168,76,0.1); }
+  .btn-submit {
+    flex: 2;
+    padding: 13px;
+    border: none;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #c9a84c, #e8c96a);
+    color: #0d1b2e;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    -webkit-tap-highlight-color: transparent;
+    transition: opacity 0.15s;
+  }
+  .btn-submit:active { opacity: 0.85; }
+
+  /* ── Toast ── */
+  .toast {
+    position: fixed;
+    top: 60px; left: 50%;
+    transform: translateX(-50%) translateY(-8px);
+    background: var(--gold);
+    color: #0d1b2e;
+    padding: 10px 22px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 700;
+    opacity: 0;
+    transition: all 0.3s;
+    z-index: 999;
+    white-space: nowrap;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* ── Thank you screen ── */
+  .thankyou {
+    display: none;
+    text-align: center;
+    padding: 60px 24px;
+  }
+  .thankyou .ty-icon { font-size: 48px; margin-bottom: 16px; }
+  .thankyou h2 { font-size: 22px; color: var(--gold); margin-bottom: 10px; }
+  .thankyou p { color: var(--muted); font-size: 14px; }
+
+  @media (max-width: 380px) {
+    .contact-grid { grid-template-columns: 1fr 1fr; }
+    .q-text { font-size: 16px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="logo-line">Japan Real Estate · 展會調查</div>
+  <h1>🏙 東京不動產投資<br>意向調查表</h1>
+  <p>填寫約 1 分鐘，填完留下聯絡方式<br>我們將為您提供專屬投資建議</p>
+  <div class="gold-line"></div>
+</div>
+
+<div class="dots-bar" id="dots-bar"></div>
+
+<div class="container" id="form-area">
+
+  <!-- Q1 投資目的 -->
+  <div class="qcard" data-num="01">
+    <div class="q-label">Q 01</div>
+    <div class="q-text">您考慮投資東京房產的主要目的是？<span class="req">*</span></div>
+    <div class="pills" id="q1" data-multi="false">
+      <label class="pill"><input type="radio" name="q1" value="資產保值・對抗通膨">💰 資產保值・對抗通膨</label>
+      <label class="pill"><input type="radio" name="q1" value="收取租金・穩定現金流">🏠 收取租金・穩定現金流</label>
+      <label class="pill"><input type="radio" name="q1" value="子女赴日就學・居住">🎓 子女赴日就學・居住</label>
+      <label class="pill"><input type="radio" name="q1" value="自用・偶爾旅居">✈️ 自用・偶爾旅居</label>
+      <label class="pill"><input type="radio" name="q1" value="資產分散・海外配置">🌏 資產分散・海外配置</label>
+      <label class="pill"><input type="radio" name="q1" value="尚在了解階段">🔍 尚在了解階段</label>
+    </div>
+  </div>
+
+  <!-- Q2 預算 -->
+  <div class="qcard" data-num="02">
+    <div class="q-label">Q 02</div>
+    <div class="q-text">您的投資預算範圍大約是？<span class="req">*</span></div>
+    <div class="pills" id="q2" data-multi="false">
+      <label class="pill"><input type="radio" name="q2" value="3,000萬日圓以下">3,000萬以下</label>
+      <label class="pill"><input type="radio" name="q2" value="3,000～5,000萬日圓">3,000～5,000萬</label>
+      <label class="pill"><input type="radio" name="q2" value="5,000萬～1億日圓">5,000萬～1億</label>
+      <label class="pill"><input type="radio" name="q2" value="1億日圓以上">1億以上</label>
+      <label class="pill"><input type="radio" name="q2" value="尚未確定">尚未確定</label>
+    </div>
+    <p style="font-size:11px;color:var(--muted);margin-top:10px">單位：日圓　※ 100萬日圓 ≈ 21萬新台幣</p>
+  </div>
+
+  <!-- Q3 物件類型 -->
+  <div class="qcard" data-num="03">
+    <div class="q-label">Q 03</div>
+    <div class="q-text">偏好哪種物件類型？（可複選）</div>
+    <div class="pills" id="q3" data-multi="true">
+      <label class="pill"><input type="checkbox" value="都心マンション（公寓）">都心マンション</label>
+      <label class="pill"><input type="checkbox" value="一戸建て（獨棟）">一戸建て 獨棟</label>
+      <label class="pill"><input type="checkbox" value="收益物件（已有租客）">收益物件 附租客</label>
+      <label class="pill"><input type="checkbox" value="新築（全新屋）">新築 全新</label>
+      <label class="pill"><input type="checkbox" value="中古（二手翻新）">中古 翻新</label>
+      <label class="pill"><input type="checkbox" value="都不限・由顧問推薦">都不限・由顧問推薦</label>
+    </div>
+  </div>
+
+  <!-- Q4 希望區域 -->
+  <div class="qcard" data-num="04">
+    <div class="q-label">Q 04</div>
+    <div class="q-text">希望的投資區域？（可複選）</div>
+    <div class="pills" id="q4" data-multi="true">
+      <label class="pill"><input type="checkbox" value="港區・澀谷區・新宿區（核心三區）">港・澀谷・新宿</label>
+      <label class="pill"><input type="checkbox" value="品川・目黒・世田谷">品川・目黑・世田谷</label>
+      <label class="pill"><input type="checkbox" value="江東・墨田・豊洲（灣岸）">豊洲・灣岸</label>
+      <label class="pill"><input type="checkbox" value="台東・文京・荒川">台東・文京</label>
+      <label class="pill"><input type="checkbox" value="橫濱・川崎">橫濱・川崎</label>
+      <label class="pill"><input type="checkbox" value="不限・由顧問推薦">不限・由顧問推薦</label>
+    </div>
+  </div>
+
+  <!-- Q5 購買時程 -->
+  <div class="qcard" data-num="05">
+    <div class="q-label">Q 05</div>
+    <div class="q-text">預計購買的時間點？<span class="req">*</span></div>
+    <div class="pills" id="q5" data-multi="false">
+      <label class="pill"><input type="radio" name="q5" value="6個月內">6 個月內</label>
+      <label class="pill"><input type="radio" name="q5" value="1年內">1 年內</label>
+      <label class="pill"><input type="radio" name="q5" value="1～2年內">1～2 年內</label>
+      <label class="pill"><input type="radio" name="q5" value="2年以上・長期規劃">2 年以上</label>
+      <label class="pill"><input type="radio" name="q5" value="尚未決定">尚未決定</label>
+    </div>
+  </div>
+
+  <!-- Q6 資金來源 -->
+  <div class="qcard" data-num="06">
+    <div class="q-label">Q 06</div>
+    <div class="q-text">資金來源方式？</div>
+    <div class="pills" id="q6" data-multi="false">
+      <label class="pill"><input type="radio" name="q6" value="全額現金">全額現金</label>
+      <label class="pill"><input type="radio" name="q6" value="考慮日本銀行貸款">考慮日本貸款</label>
+      <label class="pill"><input type="radio" name="q6" value="台灣貸款＋自備款">台灣貸款＋自備</label>
+      <label class="pill"><input type="radio" name="q6" value="法人購買">法人購買</label>
+      <label class="pill"><input type="radio" name="q6" value="尚未確定">尚未確定</label>
+    </div>
+  </div>
+
+  <!-- Q7 聯絡方式 -->
+  <div class="qcard" data-num="07">
+    <div class="q-label">Q 07</div>
+    <div class="q-text">請留下您的姓名與聯絡方式<span class="req">*</span></div>
+    <div class="text-row" style="margin-bottom:14px">
+      <div class="tf">
+        <label>姓名</label>
+        <input type="text" id="c_name" placeholder="您的姓名">
+      </div>
+      <div class="tf">
+        <label>電話（選填）</label>
+        <input type="tel" id="c_phone" placeholder="+886-">
+      </div>
+    </div>
+    <div style="margin-bottom:10px;font-size:12px;color:var(--muted)">偏好的聯絡方式（可複選）</div>
+    <div class="contact-grid">
+      <label class="contact-card" id="cc-line">
+        <input type="checkbox" value="LINE" onchange="toggleContactField()">
+        <div class="icon">💬</div>
+        <div class="cname">LINE</div>
+      </label>
+      <label class="contact-card" id="cc-wechat">
+        <input type="checkbox" value="WeChat" onchange="toggleContactField()">
+        <div class="icon">💚</div>
+        <div class="cname">WeChat</div>
+      </label>
+      <label class="contact-card" id="cc-email">
+        <input type="checkbox" value="Email" onchange="toggleContactField()">
+        <div class="icon">✉️</div>
+        <div class="cname">Email</div>
+      </label>
+      <label class="contact-card" id="cc-phone">
+        <input type="checkbox" value="電話" onchange="toggleContactField()">
+        <div class="icon">📞</div>
+        <div class="cname">電話</div>
+      </label>
+    </div>
+    <div class="contact-info-area">
+      <div class="tf" id="fi-line">
+        <label style="margin-top:10px;display:block">LINE ID</label>
+        <input type="text" id="c_line" placeholder="LINE ID">
+      </div>
+      <div class="tf" id="fi-wechat">
+        <label style="margin-top:10px;display:block">WeChat ID</label>
+        <input type="text" id="c_wechat" placeholder="WeChat ID">
+      </div>
+      <div class="tf" id="fi-email">
+        <label style="margin-top:10px;display:block">Email</label>
+        <input type="email" id="c_email" placeholder="your@email.com">
+      </div>
+    </div>
+  </div>
+
+  <!-- Q8 備註 -->
+  <div class="qcard" data-num="08">
+    <div class="q-label">Q 08</div>
+    <div class="q-text">其他想了解的問題或備註（選填）</div>
+    <div class="tf">
+      <textarea id="c_note" placeholder="例：希望了解出租報酬率、稅務規劃、看房安排等" style="min-height:72px;resize:vertical;width:100%"></textarea>
+    </div>
+  </div>
+
+</div><!-- /container -->
+
+<div class="bottom-bar">
+  <button class="btn-copy" onclick="copyText()">📋 複製</button>
+  <button class="btn-submit" onclick="submitForm()">✅ 完成・送出並複製</button>
+</div>
+
+<div class="toast" id="toast">✅ 已複製！請貼到 LINE / WeChat 傳送</div>
+
+<script>
+// ── Dots ─────────────────────────────────────────────────────────────
+const TOTAL_Q = 8;
+const dotsBar = document.getElementById("dots-bar");
+for (let i = 0; i < TOTAL_Q; i++) {
+  const d = document.createElement("div");
+  d.className = "dot";
+  d.id = `dot-${i}`;
+  dotsBar.appendChild(d);
+}
+function updateDots() {
+  const answered = getAnsweredCount();
+  for (let i = 0; i < TOTAL_Q; i++) {
+    const d = document.getElementById(`dot-${i}`);
+    d.className = "dot" + (i < answered ? " done" : (i === answered ? " active" : ""));
+  }
+}
+function getAnsweredCount() {
+  let n = 0;
+  // Q1-Q6 pills
+  ["q1","q2","q3","q4","q5","q6"].forEach(id => {
+    const g = document.getElementById(id);
+    if (g && g.querySelector("input:checked")) n++;
+  });
+  // Q7 name
+  if (document.getElementById("c_name").value.trim()) n++;
+  // Q8 always show as reachable
+  return n;
+}
+
+// ── Pill toggle ───────────────────────────────────────────────────────
+document.querySelectorAll(".pills .pill").forEach(pill => {
+  pill.addEventListener("click", () => {
+    const inp = pill.querySelector("input");
+    const group = pill.closest(".pills");
+    const isMulti = group.dataset.multi === "true";
+    if (!isMulti) {
+      group.querySelectorAll(".pill").forEach(p => {
+        p.classList.remove("active");
+        p.querySelector("input").checked = false;
+      });
+      inp.checked = true;
+      pill.classList.add("active");
+    } else {
+      inp.checked = !inp.checked;
+      pill.classList.toggle("active", inp.checked);
+    }
+    updateDots();
+  });
+});
+
+// ── Contact card toggle ───────────────────────────────────────────────
+document.querySelectorAll(".contact-card").forEach(card => {
+  card.addEventListener("click", () => {
+    const inp = card.querySelector("input");
+    inp.checked = !inp.checked;
+    card.classList.toggle("active", inp.checked);
+    toggleContactField();
+  });
+});
+function toggleContactField() {
+  const show = (id, fiId) => {
+    const cc = document.getElementById(id);
+    const fi = document.getElementById(fiId);
+    if (cc && fi) fi.classList.toggle("show", cc.querySelector("input").checked);
+  };
+  show("cc-line",   "fi-line");
+  show("cc-wechat", "fi-wechat");
+  show("cc-email",  "fi-email");
+}
+
+// ── Collect ───────────────────────────────────────────────────────────
+function getChecked(groupId) {
+  const g = document.getElementById(groupId);
+  if (!g) return "—";
+  const vals = Array.from(g.querySelectorAll("input:checked")).map(i => i.value);
+  return vals.length ? vals.join("、") : "—";
+}
+function gv(id) {
+  const el = document.getElementById(id);
+  return el ? (el.value.trim() || "—") : "—";
+}
+function getContactMethods() {
+  const parts = [];
+  if (document.getElementById("cc-line")?.querySelector("input").checked)
+    parts.push(`LINE：${gv("c_line")}`);
+  if (document.getElementById("cc-wechat")?.querySelector("input").checked)
+    parts.push(`WeChat：${gv("c_wechat")}`);
+  if (document.getElementById("cc-email")?.querySelector("input").checked)
+    parts.push(`Email：${gv("c_email")}`);
+  if (document.getElementById("cc-phone")?.querySelector("input").checked)
+    parts.push("電話");
+  return parts.length ? parts.join("　") : "—";
+}
+
+function buildText() {
+  const now = new Date();
+  const date = `${now.getFullYear()}/${now.getMonth()+1}/${now.getDate()}`;
+  return `╔══════════════════════════════╗
+  🏙 東京不動産 投資意向調查
+  展會客戶資料　${date}
+╚══════════════════════════════╝
+
+【客戶資訊】
+姓名：${gv("c_name")}
+電話：${gv("c_phone")}
+聯絡方式：${getContactMethods()}
+
+【投資意向】
+Q1 投資目的：${getChecked("q1")}
+Q2 預算範圍：${getChecked("q2")}
+Q3 物件偏好：${getChecked("q3")}
+Q4 希望區域：${getChecked("q4")}
+Q5 購買時程：${getChecked("q5")}
+Q6 資金來源：${getChecked("q6")}
+
+【備註】
+${gv("c_note")}
+
+══════════════════════════════`;
+}
+
+function copyText() {
+  const text = buildText();
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(showToast).catch(() => fallbackCopy(text));
+  } else { fallbackCopy(text); }
+}
+function fallbackCopy(text) {
+  const ta = document.createElement("textarea");
+  ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
+  document.body.appendChild(ta); ta.focus(); ta.select();
+  try { document.execCommand("copy"); showToast(); } catch(e) { alert("請手動複製內容"); }
+  document.body.removeChild(ta);
+}
+function showToast() {
+  const t = document.getElementById("toast");
+  t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 2500);
+}
+// ── 請將部署後的網址貼在這裡 ─────────────────────────────────
+// 完成 Apps Script 部署後，把「網路應用程式網址」貼到下方
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyUo-11E56kw5xkw_3DXDnvQZoH5DyV-NYPMNPNt3BQaSDzYcQ71N2dmHkrFwXETBRG_g/exec";
+// ────────────────────────────────────────────────────────────
+
+function collectData() {
+  return {
+    name:         gv("c_name"),
+    phone:        gv("c_phone"),
+    line:         document.getElementById("cc-line")?.querySelector("input").checked ? gv("c_line") : "",
+    wechat:       document.getElementById("cc-wechat")?.querySelector("input").checked ? gv("c_wechat") : "",
+    email:        document.getElementById("cc-email")?.querySelector("input").checked ? gv("c_email") : "",
+    contact_pref: getContactMethods(),
+    q1:           getChecked("q1"),
+    q2:           getChecked("q2"),
+    q3:           getChecked("q3"),
+    q4:           getChecked("q4"),
+    q5:           getChecked("q5"),
+    q6:           getChecked("q6"),
+    note:         gv("c_note")
+  };
+}
+
+function setSubmitState(loading) {
+  const btn = document.querySelector(".btn-submit");
+  btn.disabled = loading;
+  btn.textContent = loading ? "⏳ 送出中…" : "✅ 完成・送出並複製";
+}
+
+function submitForm() {
+  const name = document.getElementById("c_name").value.trim();
+  const hasContact = ["cc-line","cc-wechat","cc-email","cc-phone"]
+    .some(id => document.getElementById(id)?.querySelector("input").checked);
+  if (!name)       { alert("請填寫姓名 🙏"); return; }
+  if (!hasContact) { alert("請選擇至少一種聯絡方式 🙏"); return; }
+
+  // 先複製到剪貼簿（備份）
+  copyText();
+
+  // 如果還沒設定 URL，只複製就好
+  if (!SCRIPT_URL || SCRIPT_URL.includes("在這裡")) return;
+
+  setSubmitState(true);
+  fetch(SCRIPT_URL, {
+    method: "POST",
+    mode: "no-cors",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(collectData())
+  })
+  .then(() => {
+    setSubmitState(false);
+    showSuccessScreen();
+  })
+  .catch(() => {
+    setSubmitState(false);
+    // 網路失敗時提示已複製，不影響使用
+    alert("⚠️ 網路送出失敗，但資料已複製到剪貼簿，請手動貼給顧問。");
+  });
+}
+
+function showSuccessScreen() {
+  document.getElementById("form-area").innerHTML = `
+    <div style="text-align:center;padding:60px 24px">
+      <div style="font-size:56px;margin-bottom:20px">🏙</div>
+      <div style="font-size:22px;font-weight:700;color:var(--gold);margin-bottom:10px">感謝您的填寫！</div>
+      <div style="color:var(--muted);font-size:14px;line-height:1.8">
+        您的資料已成功記錄<br>
+        我們的顧問將盡快與您聯繫<br><br>
+        <span style="color:var(--gold)">東京不動産 · 專屬投資顧問服務</span>
+      </div>
+    </div>`;
+  document.querySelector(".dots-bar").innerHTML =
+    `<div style="color:var(--gold);font-size:13px;letter-spacing:2px">✦ 已完成 ✦</div>`;
+  document.querySelector(".bottom-bar").style.display = "none";
+}
+
+// ── Init ──────────────────────────────────────────────────────────────
+document.querySelectorAll("input, textarea").forEach(el => {
+  el.addEventListener("input", updateDots);
+  el.addEventListener("change", updateDots);
+});
+updateDots();
+</script>
+</body>
+</html>
